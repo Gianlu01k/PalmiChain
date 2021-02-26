@@ -5,6 +5,8 @@ import pickle
 
 #init
 current_txs = [] #pending transactions
+current_supply = 0
+current_available = 0
 
 #class Transaction and transaction methods
 class Transaction:
@@ -23,11 +25,16 @@ class Transaction:
 
 
 def create_tx(sender, recipient, amount, description):
+    global current_supply
+    global current_available
     transaction = Transaction(
         sender, recipient, amount, description, datetime.now())
 
     if transaction.validate():
         current_txs.append(transaction)
+        current_supply = current_supply + amount
+        current_available = current_available - amount
+        update_balance()
         return True
     return False
 
@@ -60,19 +67,25 @@ def add_block(block):
 
 #mining and validation
 def mine(reward_address):
+    global current_supply
+    global current_available
     last_block = chain[len(chain)-1]
     index = last_block.index + 1
     previous_hash = last_block.hash
 
     nonce = generate_pow(last_block)
 
-    if create_tx('0', reward_address, 1, 'mine reward') == False:
+    if create_tx('0', reward_address, reward_amount, 'mine reward') == False:
         print('Error rewarding')
-    block = Block(index, current_txs, nonce, previous_hash)
-    #print(len(block.transaction))
-    if add_block(block):
-        return chain[len(chain)-1]
-    return None
+    else:
+        block = Block(index, current_txs, nonce, previous_hash)
+        current_supply = current_supply + reward_amount
+        current_available = current_available - reward_amount
+        update_balance()
+        #print(len(block.transaction))
+        if add_block(block):
+            return chain[len(chain)-1]
+        return None
 
 def validate_pow(last_nonce, last_hash, nonce):
     sha = hashlib.sha256(f'{last_nonce}{last_hash}{nonce}'.encode())
@@ -137,20 +150,43 @@ def read_chain():
         chain = pickle.load(dl)
     return chain
 
+def update_balance():
+    f= open("balance.txt","w+")
+    f.write("Blockchain name: PalmiChain")
+    f.write("\n")
+    f.write("Cryptocoin name: palmicoin(PLM)")
+    f.write("\n")
+    f.write("Max supply:")
+    f.write("\n")
+    f.write("1000000000.00")
+    f.write("\n")
+    f.write("Current supply:")
+    f.write("\n")
+    f.write("%f" % (current_supply))
+    f.write("\n")
+    f.write("Available supply:")
+    f.write("\n")
+    f.write("%f" % (current_available))
+    f.write("\n")
+    f.write("Reward amount(PLM):")
+    f.write("\n")
+    f.write("2000") 
+    f.close()   
+
 #main (node app)
 
 #create_genesis()
 chain = read_chain() #blockchain
-f= open("balance.txt","w+")
-f.write("Blockchain name: PalmiChain\n")
-f.write("Cryptocoin name: palmicoin(PLM)\n")
-f.write("Max supply:\n")
-f.write("1000000000.00\n")
-f.write("Current supply:\n")
-f.write("0.00\n")
+f=open("balance.txt", "r")
+if f.mode == 'r':
+    f1 = f.readlines()
+current_supply = float(f1[5])
+current_available = float(f1[7])
+reward_amount = float(f1[9])
+f.close()
 choice = '-1'
 while choice != '0':
-    choice = input('Inserire scelta: \n1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain')
+    choice = input('Inserire scelta: \n1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance')
     if choice == '1':
         sender = input('Sender address: ')
         recipient = input('Recipient address: ')
@@ -185,3 +221,8 @@ while choice != '0':
             print('There isn''t any transaction to convalidate and mine')
     if choice == '5':
         print_chain()
+    if choice == '6':
+        f=open("balance.txt", "r")
+        f1 = f.readlines()
+        for x in f1:
+            print(x)
