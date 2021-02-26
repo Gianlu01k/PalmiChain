@@ -3,4 +3,8 @@ Cryptocoin name: palmicoin(PLM)
 Max supply:
 1000000000.00
 Current supply:
-0.00
+0.0
+Available supply:
+1000000000.00
+Reward amount(PLM):
+2000
