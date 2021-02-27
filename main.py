@@ -2,11 +2,14 @@
 from datetime import datetime
 import hashlib
 import pickle
+import random
+import string
 
 #init
 current_txs = [] #pending transactions
 current_supply = 0
 current_available = 0
+wallets = []
 
 #class Transaction and transaction methods
 class Transaction:
@@ -32,9 +35,8 @@ def create_tx(sender, recipient, amount, description):
 
     if transaction.validate():
         current_txs.append(transaction)
-        current_supply = current_supply + amount
-        current_available = current_available - amount
-        update_balance()
+        current_supply = current_supply - amount
+        current_available = current_available + amount
         return True
     return False
 
@@ -79,9 +81,8 @@ def mine(reward_address):
         print('Error rewarding')
     else:
         block = Block(index, current_txs, nonce, previous_hash)
-        current_supply = current_supply + reward_amount
-        current_available = current_available - reward_amount
-        update_balance()
+        current_supply = current_supply - reward_amount
+        current_available = current_available + reward_amount
         #print(len(block.transaction))
         if add_block(block):
             return chain[len(chain)-1]
@@ -114,8 +115,20 @@ def validate_block(current_block, previous_block):
         
     return True
 
-#visualize methods (for test)
+#wallet management
+class Wallet:
 
+    def __init__(self, address, private_key, balance):
+        self.address = address
+        self.private_key = private_key
+        self.balance = balance
+
+def get_random_string():
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(8))
+    return result_str
+
+#visualize methods (for test)
 def print_pending_tx(index):
     if len(current_txs) != 0:
          print("Sender: %s\n, Recipient: %s\n, Amount: %f\n, Data: %s\n, Date: %s\n" % (current_txs[index].sender, current_txs[index].recipient, current_txs[index].amount, current_txs[index].description, current_txs[index].timestamp))
@@ -138,6 +151,10 @@ def print_chain():
         else:
             print('<---------------------END_BLOCK------------------------->')
 
+def print_wallets():
+    for x in wallets:
+        print("Address: %s,\nPrivate Key: %s, \nBalance: %s PLM" % (x.address, x.private_key, x.balance))
+
 #create blockchain (genesis block to call first time)
 def create_genesis():
     genesis_block = Block(0, [], 0 , '63N3515')
@@ -145,10 +162,20 @@ def create_genesis():
     with open('ledger', 'wb') as dl: #write genesis block on ledger file
         pickle.dump(chain, dl)
 
+#read and write methods
 def read_chain():
     with open('ledger', 'rb') as dl:
         chain = pickle.load(dl)
     return chain
+
+def read_wallets():
+    with open('wallets', 'rb') as wall:
+        wallets = pickle.load(wall)
+    return wallets   
+
+def save_wallet():
+    with open('wallets', 'wb') as wll: #write genesis block on ledger file
+        pickle.dump(wallets, wll)
 
 def update_balance():
     f= open("balance.txt","w+")
@@ -158,7 +185,7 @@ def update_balance():
     f.write("\n")
     f.write("Max supply:")
     f.write("\n")
-    f.write("1000000000.00")
+    f.write("1000000000.000000")
     f.write("\n")
     f.write("Current supply:")
     f.write("\n")
@@ -170,13 +197,13 @@ def update_balance():
     f.write("\n")
     f.write("Reward amount(PLM):")
     f.write("\n")
-    f.write("2000") 
+    f.write("2000.000000") 
     f.close()   
 
 #main (node app)
-
 #create_genesis()
 chain = read_chain() #blockchain
+wallets =  read_wallets() #wallets, private keys and amounts
 f=open("balance.txt", "r")
 if f.mode == 'r':
     f1 = f.readlines()
@@ -186,7 +213,7 @@ reward_amount = float(f1[9])
 f.close()
 choice = '-1'
 while choice != '0':
-    choice = input('Inserire scelta: \n1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance')
+    choice = input('Inserire scelta: \n1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance, 7-createWallet, 8-getAllWallets')
     if choice == '1':
         sender = input('Sender address: ')
         recipient = input('Recipient address: ')
@@ -215,7 +242,7 @@ while choice != '0':
             if block_mined == None:
                 print('Block not mined')
             else:
-                print('Block mined, enjoy your reward: ')
+                print('Block mined, enjoy your reward: %f PLM' % (reward_amount))
                 #print_block(block_mined)
         else:
             print('There isn''t any transaction to convalidate and mine')
@@ -226,3 +253,16 @@ while choice != '0':
         f1 = f.readlines()
         for x in f1:
             print(x)
+    if choice == '7':
+        pk = input('Insert a private key: ')
+        hash_pk = hashlib.sha256(pk.encode('utf-8')).hexdigest()
+        print('This is your private key, do not forget it: %s' % (hash_pk))
+        address = get_random_string()
+        hash_address = hashlib.sha256(address.encode('utf-8')).hexdigest()
+        print('Here is your wallet address: %s' % (hash_address))
+        new_wallet = Wallet(hash_address, hash_pk, 0)
+        wallets.append(new_wallet)
+    if choice == '8':
+        print_wallets()
+save_wallet()
+update_balance()
