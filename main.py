@@ -9,7 +9,10 @@ import string
 current_txs = [] #pending transactions
 current_supply = 0
 current_available = 0
+reward_amount = 0
 wallets = []
+current_wallet = None
+session = False
 
 #class Transaction and transaction methods
 class Transaction:
@@ -22,7 +25,7 @@ class Transaction:
         self.timestamp = timestamp
 
     def validate(self):
-        if self.amount < 0:
+        if self.amount < 0 : # && self.amount > wallet_balance
             return False
         return True
 
@@ -35,8 +38,9 @@ def create_tx(sender, recipient, amount, description):
 
     if transaction.validate():
         current_txs.append(transaction)
-        current_supply = current_supply - amount
-        current_available = current_available + amount
+        #current_supply = current_supply - amount
+        #current_available = current_available + amount
+        #wallet.balance = wallet.balance - amount
         return True
     return False
 
@@ -81,8 +85,8 @@ def mine(reward_address):
         print('Error rewarding')
     else:
         block = Block(index, current_txs, nonce, previous_hash)
-        current_supply = current_supply - reward_amount
-        current_available = current_available + reward_amount
+        #current_supply = current_supply - reward_amount
+        #current_available = current_available + reward_amount
         #print(len(block.transaction))
         if add_block(block):
             return chain[len(chain)-1]
@@ -200,20 +204,46 @@ def update_balance():
     f.write("2000.000000") 
     f.close()   
 
+
+def read_balance():
+    f = open("balance.txt", "r")
+    if f.mode == 'r':
+        f1 = f.readlines()
+        current_supply = float(f1[5])
+        current_available = float(f1[7])
+        reward_amount = float(f1[9])
+    f.close()
+
+def login(address, pk):
+    hash_pk = hashlib.sha256(pk.encode('utf-8')).hexdigest()
+    for check_wallet in wallets:
+        if ((check_wallet.address == address) & (check_wallet.private_key == hash_pk)):
+            return check_wallet
+    return None
+
 #main (node app)
 #create_genesis()
+
+#data initialization
 chain = read_chain() #blockchain
 wallets =  read_wallets() #wallets, private keys and amounts
-f=open("balance.txt", "r")
-if f.mode == 'r':
-    f1 = f.readlines()
-current_supply = float(f1[5])
-current_available = float(f1[7])
-reward_amount = float(f1[9])
-f.close()
-choice = '-1'
-while choice != '0':
-    choice = input('Inserire scelta: \n1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance, 7-createWallet, 8-getAllWallets')
+read_balance()
+
+choice = '-2'
+while choice != '-1':
+    choice = input('Inserire scelta: \n0-Login, 1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance, 7-createWallet, 8-getAllWallets') #8 is only for test
+    if ((choice in {'1','2','4'}) & (session == False)):
+        choice = '-2'
+        print('Not logged')    
+    if choice == '0':
+        #login procedure
+        address = input('Insert your wallet address: ')
+        pk = input('Insert your private key: ')
+        current_wallet = login(address, pk)
+        if current_wallet != None:
+            session = True
+        else:
+            print('Address o private key wrong')
     if choice == '1':
         sender = input('Sender address: ')
         recipient = input('Recipient address: ')
