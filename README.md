@@ -1,4 +1,4 @@
-# PalmiChain version 0.1
+# PalmiChain version 0.1.1
 A new private and not revolutionary blockchain built in Python
 
 Python --version: 3.9.1
