@@ -7,9 +7,9 @@ import string
 
 #init
 current_txs = [] #pending transactions
-current_supply = 0
-current_available = 0
-reward_amount = 0
+current_supply = 0.000000
+current_available = 0.000000
+reward_amount = 0.000000
 wallets = []
 current_wallet = None
 session = False
@@ -25,24 +25,35 @@ class Transaction:
         self.timestamp = timestamp
 
     def validate(self):
-        if self.amount < 0 : # && self.amount > wallet_balance
-            return False
+        if self.sender != '0':
+            if((self.amount < 0) | (self.amount > current_wallet.balance)):
+                print("E' qui")
+                return False
+            return True
         return True
-
 
 def create_tx(sender, recipient, amount, description):
     global current_supply
     global current_available
     transaction = Transaction(
         sender, recipient, amount, description, datetime.now())
+    wallet_recipient = check_recipient(recipient)
+    if  wallet_recipient != None:
+        if transaction.validate():
+            wallet_recipient.balance = wallet_recipient.balance + amount
+            current_txs.append(transaction)
+            #current_supply = current_supply - amount
+            #current_available = current_available + amount
+            #wallet.balance = wallet.balance - amount
+            return True
 
-    if transaction.validate():
-        current_txs.append(transaction)
-        #current_supply = current_supply - amount
-        #current_available = current_available + amount
-        #wallet.balance = wallet.balance - amount
-        return True
-    return False
+def check_recipient(address):
+    global wallets
+    for x in wallets:
+        if address == x.address:
+            return x
+        else:
+            return None
 
 #class Block and block methods
 class Block:
@@ -73,8 +84,7 @@ def add_block(block):
 
 #mining and validation
 def mine(reward_address):
-    global current_supply
-    global current_available
+    global reward_amount
     last_block = chain[len(chain)-1]
     index = last_block.index + 1
     previous_hash = last_block.hash
@@ -206,18 +216,21 @@ def update_balance():
 
 
 def read_balance():
+    global reward_amount
     f = open("balance.txt", "r")
     if f.mode == 'r':
         f1 = f.readlines()
         current_supply = float(f1[5])
         current_available = float(f1[7])
         reward_amount = float(f1[9])
+        print(reward_amount)
     f.close()
 
 def login(address, pk):
     hash_pk = hashlib.sha256(pk.encode('utf-8')).hexdigest()
     for check_wallet in wallets:
         if ((check_wallet.address == address) & (check_wallet.private_key == hash_pk)):
+            print('Successful login\n')
             return check_wallet
     return None
 
@@ -245,7 +258,7 @@ while choice != '-1':
         else:
             print('Address o private key wrong')
     if choice == '1':
-        sender = input('Sender address: ')
+        sender = current_wallet.address
         recipient = input('Recipient address: ')
         amount = float(input('Insert amount of transaction: '))
         description = input('Insert data: ')
@@ -267,8 +280,7 @@ while choice != '-1':
             print('Empty list')
     if choice == '4':
         if len(current_txs) != 0:
-            address = input('Insert address where rewards will be send: ')
-            block_mined = mine(address)
+            block_mined = mine(current_wallet.address)
             if block_mined == None:
                 print('Block not mined')
             else:
