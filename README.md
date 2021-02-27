@@ -13,3 +13,8 @@ Blockchain currency: palmicoin (PLM)
 Max Supply: 1.000.000.000,00 (1B PLM)
 Current supply: 0
 Available PLM: 1.000.000.000,00 (1B PLM)
+
+Version 0.1.1
+Updates: 
+-Login and account management added
+-Minor fixes
