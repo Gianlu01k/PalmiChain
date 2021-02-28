@@ -31,15 +31,15 @@
   -Transaction error fixed
   -Minor fixes
 
-## Donations: 
-https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
-
-## License:
-Read LICENSE.md (https://github.com/Gianlu01k/PalmiChain/blob/main/LICENSE)
-
 ## Contacts:
 - E-Mail: gianlupalmi01@gmail.com
 - Blog: https://sites.google.com/view/gianluigipalmisano/home-page
 - Instagram: @gianlu_palmisano
 - Twitter: @gianlupalmisano
 - LinkedIn: Gianluigi Palmisano
+
+## Donations: 
+https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
+
+## License:
+Read LICENSE.md (https://github.com/Gianlu01k/PalmiChain/blob/main/LICENSE)
