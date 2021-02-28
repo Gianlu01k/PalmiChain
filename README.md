@@ -18,7 +18,7 @@
 **Version 0.1.1**
 - Updates: 
   - Login and account management added
--Fixes:
+- Fixes:
   - Minor fixes
 
 Version 0.1.2
@@ -29,3 +29,5 @@ Version 0.1.2
 - Fixes
   -Transaction error fixed
   -Minor fixes
+
+##Donations:## https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
