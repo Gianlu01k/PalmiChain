@@ -3,6 +3,10 @@ Cryptocoin name: palmicoin(PLM)
 Max supply:
 1000000000.000000
 Circulating supply:
-4000.000000
+6100.000000
 Reward amount(PLM):
 2000.000000
+Transaction counter:
+2
+Volume (PLM):
+2100.000000

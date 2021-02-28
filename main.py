@@ -7,6 +7,7 @@ import string
 
 #init
 current_txs = [] #pending transactions
+chain = [] 
 current_available = 0.000000
 reward_amount = 0.000000
 wallets = []
@@ -146,7 +147,7 @@ def get_random_string():
 #visualize methods (for test)
 def print_pending_tx(index):
     if len(current_txs) != 0:
-         print("Sender: %s\n, Recipient: %s\n, Amount: %f\n, Data: %s\n, Date: %s\n" % (current_txs[index].sender, current_txs[index].recipient, current_txs[index].amount, current_txs[index].description, current_txs[index].timestamp))
+         print("Sender: %s\n Recipient: %s\n Amount: %f\n Data: %s\n Date: %s\n" % (current_txs[index].sender, current_txs[index].recipient, current_txs[index].amount, current_txs[index].description, current_txs[index].timestamp))
     else:
         print('Empty list')
         print(len(current_txs))
@@ -155,20 +156,24 @@ def print_block(block):
     print("Index :%d, Nonce: %d, Previous Hash: %s" % (block.index, block.nonce, block.previous_hash))
     print("Transactions:")
     for i in range(0, len(block.transaction)):
-        print("Sender: %s\n, Recipient: %s\n, Amount: %f\n, Data: %s\n, Date: %s\n" % (block.transaction[i].sender, block.transaction[i].recipient, block.transaction[i].amount, block.transaction[i].description, block.transaction[i].timestamp))
+        print("Sender: %s\n Recipient: %s\n Amount: %f\n Data: %s\n Date: %s\n" % (block.transaction[i].sender, block.transaction[i].recipient, block.transaction[i].amount, block.transaction[i].description, block.transaction[i].timestamp))
 
 def print_chain():
     print('<---------------------GENESIS_BLOCK--------------------->')
     for x in range(0, len(chain)):
         print_block(chain[x])
-        if x != len(chain)-1:
+        if x != len(chain) - 1:
             print('<---------------------NEXT_BLOCK------------------------>')
         else:
-            print('<---------------------END_BLOCK------------------------->')
+            print('<---------------------END_BLOCKS------------------------>')
 
 def print_wallets():
     for x in wallets:
         print("Address: %s,\nPrivate Key: %s, \nBalance: %s PLM" % (x.address, x.private_key, x.balance))
+        if x != wallets[len(wallets) - 1] :
+            print('<----------------------NEXT-WALLET---------------------->')
+        else:
+            print('<----------------------END-WALLETS---------------------->')
 
 #create blockchain (genesis block to call first time)
 def create_genesis():
@@ -208,15 +213,15 @@ def update_balance():
     f.write("\n")
     f.write("Reward amount(PLM):")
     f.write("\n")
-    f.write(reward_amount) 
+    f.write("%f" % (reward_amount)) 
     f.write("\n")
     f.write("Transaction counter:")
     f.write("\n")
-    f.write(transaction_counter) 
+    f.write("%d" % (transaction_counter)) 
     f.write("\n")
     f.write("Volume (PLM):")
     f.write("\n")
-    f.write(volume) 
+    f.write("%f" % (volume))
     f.close()   
 
 
@@ -238,16 +243,16 @@ def login(address, pk):
             return check_wallet
     return None
 
-def update_data():
-    chain = read_chain() #blockchain
-    wallets =  read_wallets() #wallets, private keys and amounts
-    read_balance()
+
+
 
 #main (node app)
 #create_genesis()
 
 #data initialization
-update_data()
+chain = read_chain() #blockchain
+wallets =  read_wallets() #wallets, private keys and amounts
+read_balance()
 choice = '-2'
 while choice != '-1':
     choice = input('Inserire scelta: \n0-Login, 1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance, 7-createWallet, 8-getAllWallets') #8 is only for test
@@ -272,7 +277,7 @@ while choice != '-1':
             print('Success')
         else:
             print('Failed')
-        update_data()
+        update_balance()
     if choice == '2':
         index = int(input('Which pending transaction do you want to read?'))
         if index > len(current_txs):
@@ -295,7 +300,7 @@ while choice != '-1':
                 #print_block(block_mined)
         else:
             print('There isn''t any transaction to convalidate and mine')
-        update_data()
+        update_balance()
     if choice == '5':
         print_chain()
     if choice == '6':
@@ -312,7 +317,7 @@ while choice != '-1':
         print('Here is your wallet address: %s' % (hash_address))
         new_wallet = Wallet(hash_address, hash_pk, 0)
         wallets.append(new_wallet)
-        update_data()
+        save_wallet()
     if choice == '8':
         print_wallets()
 save_wallet()
