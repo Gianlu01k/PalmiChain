@@ -22,7 +22,7 @@
 - Fixes:
   - Minor fixes
 
-Version 0.1.2
+** Version 0.1.2**
 - Updates:
   - Halving
   - Transaction and Volume counters
@@ -34,5 +34,5 @@ Version 0.1.2
 ## Donations: 
 https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
 
-##License:
-Read LINCESE.md ()
+## License:
+Read LINCESE.md (https://github.com/Gianlu01k/PalmiChain/blob/main/LICENSE)
