@@ -22,7 +22,7 @@
 - Fixes:
   - Minor fixes
 
-** v0.1.2**
+**v0.1.2**
 - Updates:
   - Halving
   - Transaction and Volume counters
