@@ -35,7 +35,7 @@
 https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
 
 ## License:
-Read LINCESE.md (https://github.com/Gianlu01k/PalmiChain/blob/main/LICENSE)
+Read LICENSE.md (https://github.com/Gianlu01k/PalmiChain/blob/main/LICENSE)
 
 ## Contacts:
 E-Mail: gianlupalmi01@gmail.com
