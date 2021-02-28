@@ -15,6 +15,7 @@
 - Blockchain currency: palmicoin (PLM)
 - Max Supply: 1.000.000.000,00 (1B PLM)
 
+## Versions:
 **Version 0.1.1**
 - Updates: 
   - Login and account management added
@@ -32,3 +33,6 @@ Version 0.1.2
 
 ## Donations: 
 https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
+
+##License:
+Read LINCESE.md ()
