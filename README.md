@@ -30,4 +30,5 @@ Version 0.1.2
   -Transaction error fixed
   -Minor fixes
 
-##Donations:## https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
+##Donations: 
+https://www.paypal.com/donate?hosted_button_id=2R5WSLBP6XL22
