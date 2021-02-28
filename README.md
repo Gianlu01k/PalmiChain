@@ -16,13 +16,13 @@
 - Max Supply: 1.000.000.000,00 (1B PLM)
 
 ## Versions:
-**Version 0.1.1**
+**v0.1.1**
 - Updates: 
   - Login and account management added
 - Fixes:
   - Minor fixes
 
-** Version 0.1.2**
+** v0.1.2**
 - Updates:
   - Halving
   - Transaction and Volume counters
