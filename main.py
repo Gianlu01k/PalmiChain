@@ -7,12 +7,13 @@ import string
 
 #init
 current_txs = [] #pending transactions
-current_supply = 0.000000
 current_available = 0.000000
 reward_amount = 0.000000
 wallets = []
 current_wallet = None
 session = False
+transaction_counter = 0
+volume = 0.000000
 
 #class Transaction and transaction methods
 class Transaction:
@@ -27,24 +28,25 @@ class Transaction:
     def validate(self):
         if self.sender != '0':
             if((self.amount < 0) | (self.amount > current_wallet.balance)):
-                print("E' qui")
                 return False
             return True
         return True
 
 def create_tx(sender, recipient, amount, description):
-    global current_supply
     global current_available
+    global transaction_counter
+    global volume
     transaction = Transaction(
         sender, recipient, amount, description, datetime.now())
     wallet_recipient = check_recipient(recipient)
     if  wallet_recipient != None:
         if transaction.validate():
             wallet_recipient.balance = wallet_recipient.balance + amount
+            if sender != '0':
+                current_wallet.balance = current_wallet.balance - amount
+            volume = volume + amount
+            transaction_counter = transaction_counter + 1
             current_txs.append(transaction)
-            #current_supply = current_supply - amount
-            #current_available = current_available + amount
-            #wallet.balance = wallet.balance - amount
             return True
 
 def check_recipient(address):
@@ -52,8 +54,7 @@ def check_recipient(address):
     for x in wallets:
         if address == x.address:
             return x
-        else:
-            return None
+    return None
 
 #class Block and block methods
 class Block:
@@ -83,22 +84,22 @@ def add_block(block):
     return False
 
 #mining and validation
-def mine(reward_address):
+def mine():
     global reward_amount
+    global current_available
+    global current_wallet
     last_block = chain[len(chain)-1]
     index = last_block.index + 1
     previous_hash = last_block.hash
-
     nonce = generate_pow(last_block)
-
-    if create_tx('0', reward_address, reward_amount, 'mine reward') == False:
+    if create_tx('0', current_wallet.address, reward_amount, 'mine reward') == False:
         print('Error rewarding')
     else:
         block = Block(index, current_txs, nonce, previous_hash)
-        #current_supply = current_supply - reward_amount
-        #current_available = current_available + reward_amount
-        #print(len(block.transaction))
         if add_block(block):
+            current_available = current_available + reward_amount
+            if ((index % 10000000) == 0):
+                reward_amount = reward_amount / 2   #halving every 10 million block mined
             return chain[len(chain)-1]
         return None
 
@@ -201,29 +202,32 @@ def update_balance():
     f.write("\n")
     f.write("1000000000.000000")
     f.write("\n")
-    f.write("Current supply:")
-    f.write("\n")
-    f.write("%f" % (current_supply))
-    f.write("\n")
-    f.write("Available supply:")
+    f.write("Circulating supply:")
     f.write("\n")
     f.write("%f" % (current_available))
     f.write("\n")
     f.write("Reward amount(PLM):")
     f.write("\n")
-    f.write("2000.000000") 
+    f.write(reward_amount) 
+    f.write("\n")
+    f.write("Transaction counter:")
+    f.write("\n")
+    f.write(transaction_counter) 
+    f.write("\n")
+    f.write("Volume (PLM):")
+    f.write("\n")
+    f.write(volume) 
     f.close()   
 
 
 def read_balance():
     global reward_amount
+    global current_available
     f = open("balance.txt", "r")
     if f.mode == 'r':
         f1 = f.readlines()
-        current_supply = float(f1[5])
-        current_available = float(f1[7])
-        reward_amount = float(f1[9])
-        print(reward_amount)
+        current_available = float(f1[5])
+        reward_amount = float(f1[7])
     f.close()
 
 def login(address, pk):
@@ -234,14 +238,16 @@ def login(address, pk):
             return check_wallet
     return None
 
+def update_data():
+    chain = read_chain() #blockchain
+    wallets =  read_wallets() #wallets, private keys and amounts
+    read_balance()
+
 #main (node app)
 #create_genesis()
 
 #data initialization
-chain = read_chain() #blockchain
-wallets =  read_wallets() #wallets, private keys and amounts
-read_balance()
-
+update_data()
 choice = '-2'
 while choice != '-1':
     choice = input('Inserire scelta: \n0-Login, 1-Send, 2-getPendingTx, 3-getAllPendingTx, 4-mineBlock, 5-getChain, 6-getBalance, 7-createWallet, 8-getAllWallets') #8 is only for test
@@ -266,6 +272,7 @@ while choice != '-1':
             print('Success')
         else:
             print('Failed')
+        update_data()
     if choice == '2':
         index = int(input('Which pending transaction do you want to read?'))
         if index > len(current_txs):
@@ -280,7 +287,7 @@ while choice != '-1':
             print('Empty list')
     if choice == '4':
         if len(current_txs) != 0:
-            block_mined = mine(current_wallet.address)
+            block_mined = mine()
             if block_mined == None:
                 print('Block not mined')
             else:
@@ -288,6 +295,7 @@ while choice != '-1':
                 #print_block(block_mined)
         else:
             print('There isn''t any transaction to convalidate and mine')
+        update_data()
     if choice == '5':
         print_chain()
     if choice == '6':
@@ -304,6 +312,7 @@ while choice != '-1':
         print('Here is your wallet address: %s' % (hash_address))
         new_wallet = Wallet(hash_address, hash_pk, 0)
         wallets.append(new_wallet)
+        update_data()
     if choice == '8':
         print_wallets()
 save_wallet()

@@ -2,9 +2,7 @@ Blockchain name: PalmiChain
 Cryptocoin name: palmicoin(PLM)
 Max supply:
 1000000000.000000
-Current supply:
-0.000000
-Available supply:
-0.000000
+Circulating supply:
+4000.000000
 Reward amount(PLM):
 2000.000000
